@@ -421,6 +421,17 @@ function filter-select() {
 
                     displays+="${desc_disp}"
 
+                    if (( disp_num == cursor_line )); then
+                        region_highlight+="${offset} $(( offset + ${#desc_disp} + 1 )) ${hi_selected}"
+                        selected="${candidates[$i]}"
+                        (( selected_num = display_head_line + disp_num - 1 ))
+                        selected_index="${i}"
+                    fi
+
+                    if (( is_marked )); then
+                        region_highlight+="${offset} $(( offset + ${#desc_disp} - ${#mark_idx_disp} + 1 )) ${hi_marked}"
+                    fi
+
                     if [[ -n "${BUFFER}" ]]; then
                         # highlight matched words
                         for pattern in \
@@ -430,17 +441,6 @@ function filter-select() {
                                 region_highlight+=( "${(f)${(S)desc_disp//*(#b)${~pattern}/$(( offset + mbegin[1] )) $(( offset + mend[1] + 1 )) ${hi_matched}${nl}}%$nl*}" )
                             fi
                         done
-                    fi
-
-                    if (( is_marked )); then
-                        region_highlight+="${offset} $(( offset + ${#desc_disp} - ${#mark_idx_disp} + 1 )) ${hi_marked}"
-                    fi
-
-                    if (( disp_num == cursor_line )); then
-                        region_highlight+="${offset} $(( offset + ${#desc_disp} + 1 )) ${hi_selected}"
-                        selected="${candidates[$i]}"
-                        (( selected_num = display_head_line + disp_num - 1 ))
-                        selected_index="${i}"
                     fi
 
                     (( offset += ${#desc_disp} + 1 )) # +1 -> \n
