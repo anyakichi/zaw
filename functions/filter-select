@@ -151,6 +151,9 @@ function filter-select() {
     local rotate_list
     zstyle -b ':filter-select' rotate-list rotate_list
 
+    local use_cursor_line
+    zstyle -b ':filter-select' use-cursor-line use_cursor_line
+
     _filter-select-init-keybind
 
     candidates=()
@@ -412,11 +415,23 @@ function filter-select() {
                         mark_idx_disp=""
                     fi
 
-                    if (( ${(m)#desc_disp} + $#mark_idx_disp > COLUMNS - 1 )) && (( disp_num != cursor_line )); then
+                    if (( ${(m)#desc_disp} + $#mark_idx_disp > COLUMNS - 1 )); then
                         # strip long line
-                        desc_disp="${(mr:$(( COLUMNS - $#mark_idx_disp - 6 )):::::)desc_disp} ...${mark_idx_disp}"
+                        if (( disp_num != cursor_line )); then
+                            desc_disp="${(mr:$(( COLUMNS - $#mark_idx_disp - 6 )):::::)desc_disp} ...${mark_idx_disp}"
+                        elif [[ $use_cursor_line == "yes" ]]; then
+                            integer num_rows
+                            (( num_rows = (${(m)#desc_disp} + $#mark_idx_disp + COLUMNS - 1) / COLUMNS ))
+                            desc_disp="${(mr:$(( num_rows * COLUMNS - $#mark_idx_disp - 1 )):::::)desc_disp}${mark_idx_disp}"
+                        else
+                            desc_disp="${desc_disp}${mark_idx_disp}"
+                        fi
                     else
-                        desc_disp="${desc_disp}${mark_idx_disp}"
+                        if [[ $use_cursor_line == "yes" ]]; then
+                            desc_disp="${(mr:$(( COLUMNS - $#mark_idx_disp - 1 )):::::)desc_disp}${mark_idx_disp}"
+                        else
+                            desc_disp="${desc_disp}${mark_idx_disp}"
+                        fi
                     fi
 
                     displays+="${desc_disp}"
