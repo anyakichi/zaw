@@ -412,7 +412,7 @@ function filter-select() {
                         mark_idx_disp=""
                     fi
 
-                    if (( ${(m)#desc_disp} + $#mark_idx_disp > COLUMNS - 1 )); then
+                    if (( ${(m)#desc_disp} + $#mark_idx_disp > COLUMNS - 1 )) && (( disp_num != cursor_line )); then
                         # strip long line
                         desc_disp="${(mr:$(( COLUMNS - $#mark_idx_disp - 6 )):::::)desc_disp} ...${mark_idx_disp}"
                     else
