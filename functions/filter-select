@@ -422,14 +422,17 @@ function filter-select() {
                     displays+="${desc_disp}"
 
                     if (( disp_num == cursor_line )); then
-                        region_highlight+="${offset} $(( offset + ${#desc_disp} + 1 )) ${hi_selected}"
                         selected="${candidates[$i]}"
                         (( selected_num = display_head_line + disp_num - 1 ))
                         selected_index="${i}"
-                    fi
 
-                    if (( is_marked )); then
-                        region_highlight+="${offset} $(( offset + ${#desc_disp} - ${#mark_idx_disp} + 1 )) ${hi_marked}"
+                        hi="${hi_selected}"
+                        if (( is_marked )); then
+                            hi+=",${hi_marked}"
+                        fi
+                        region_highlight+="${offset} $(( offset + ${#desc_disp} + 1 )) ${hi}"
+                    elif (( is_marked )); then
+                        region_highlight+="${offset} $(( offset + ${#desc_disp} + 1 )) ${hi_marked}"
                     fi
 
                     if [[ -n "${BUFFER}" ]]; then
