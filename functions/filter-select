@@ -129,6 +129,7 @@ function filter-select() {
     local key cand lines selected cand_disp buffer_pre_zle last_buffer initbuffer=''
     local opt pattern msg unused title='' exit_pattern nl=$'\n'
     local selected_index mark_idx_disp hi start end spec
+    local s1 s2
 
     local -a displays matched_desc_keys match mbegin mend outs exit_wigdets
     local -a init_region_highlight marked_lines
@@ -436,27 +437,29 @@ function filter-select() {
 
                     displays+="${desc_disp}"
 
+                    hi=""
+
                     if (( disp_num == cursor_line )); then
+                        hi="${hi_selected}"
+                        region_highlight+="${offset} $(( offset + ${#desc_disp} + 1 )) ${hi}"
                         selected="${candidates[$i]}"
                         (( selected_num = display_head_line + disp_num - 1 ))
                         selected_index="${i}"
+                    fi
 
-                        hi="${hi_selected}"
-                        if (( is_marked )); then
-                            hi+=",${hi_marked}"
-                        fi
+                    if (( is_marked )); then
+                        hi=$(_filter-select-merge-highlights "${hi}" "${hi_marked}")
                         region_highlight+="${offset} $(( offset + ${#desc_disp} + 1 )) ${hi}"
-                    elif (( is_marked )); then
-                        region_highlight+="${offset} $(( offset + ${#desc_disp} + 1 )) ${hi_marked}"
                     fi
 
                     if [[ -n "${BUFFER}" ]]; then
                         # highlight matched words
+                        hi=$(_filter-select-merge-highlights "${hi}" "${hi_matched}")
                         for pattern in \
                             "(${(j.|.)${(@M)words:#*'(#e)'}})" \
                             "(${(j.|.)${(@)words:#(\~*|*'(#e)')}})" ; do
                             if [[ "$pattern" != '()' ]]; then
-                                region_highlight+=( "${(f)${(S)desc_disp//*(#b)${~pattern}/$(( offset + mbegin[1] )) $(( offset + mend[1] + 1 )) ${hi_matched}${nl}}%$nl*}" )
+                                region_highlight+=( "${(f)${(S)desc_disp//*(#b)${~pattern}/$(( offset + mbegin[1] )) $(( offset + mend[1] + 1 )) ${hi}${nl}}%$nl*}" )
                             fi
                         done
                     fi
@@ -746,6 +749,25 @@ function _filter-select-read-keys() {
     fi
 
     return $ret
+}
+
+function _filter-select-merge-highlights() {
+    local -U hi1 hi2
+
+    hi1=${(s:,:)1}
+    hi2=${(s:,:)2}
+
+    if (( ${hi2[(I)fg=*]} )); then
+        hi1=( ${hi1:#fg=*} )
+    fi
+
+    if (( ${hi2[(I)bg=*]} )); then
+        hi1=( ${hi1:#bg=*} )
+    fi
+
+    hi1=( $hi1 $hi2 )
+
+    print -n ${(j:,:)hi1}
 }
 
 filter-select "$@"
