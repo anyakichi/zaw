@@ -399,13 +399,10 @@ function filter-select() {
                     (( disp_num++ ))
                     desc="${descriptions[$i]}"
 
-                    desc_disp="${desc}"
-
                     # escape \r\n\t\
-                    desc_disp="${desc_disp//\\/\\\\}"
-                    desc_disp="${desc_disp//$'\n'/\\n}"
-                    desc_disp="${desc_disp//$'\r'/\\r}"
-                    desc_disp="${desc_disp//$'\t'/\\t}"
+                    desc="${desc//$'\n'/\\n}"
+                    desc="${desc//$'\r'/\\r}"
+                    desc="${desc//$'\t'/\\t}"
 
                     mark_idx="${marked_lines[(ie)${i}]}"
                     (( is_marked = mark_idx <= $#marked_lines ))
@@ -416,23 +413,16 @@ function filter-select() {
                         mark_idx_disp=""
                     fi
 
-                    if (( ${(m)#desc_disp} + $#mark_idx_disp > COLUMNS - 1 )); then
-                        # strip long line
-                        if (( disp_num != cursor_line )); then
-                            desc_disp="${(mr:$(( COLUMNS - $#mark_idx_disp - 6 )):::::)desc_disp} ...${mark_idx_disp}"
-                        elif [[ $use_cursor_line == "yes" ]]; then
-                            integer num_rows
-                            (( num_rows = (${(m)#desc_disp} + $#mark_idx_disp + COLUMNS - 1) / COLUMNS ))
-                            desc_disp="${(mr:$(( num_rows * COLUMNS - $#mark_idx_disp - 1 )):::::)desc_disp}${mark_idx_disp}"
-                        else
-                            desc_disp="${desc_disp}${mark_idx_disp}"
-                        fi
+                    if (( ${(m)#desc} + $#mark_idx_disp > COLUMNS - 1 )) && (( disp_num != cursor_line )); then
+                        desc="${(mr:$(( COLUMNS - $#mark_idx_disp - 6 )):::::)desc} ..."
+                    fi
+
+                    if [[ $use_cursor_line == "yes" ]]; then
+                        integer num_rows
+                        (( num_rows = (${(m)#desc} + $#mark_idx_disp + COLUMNS - 1) / COLUMNS ))
+                        desc_disp="${(mr:$(( num_rows * COLUMNS - $#mark_idx_disp - 1 )):::::)desc}${mark_idx_disp}"
                     else
-                        if [[ $use_cursor_line == "yes" ]]; then
-                            desc_disp="${(mr:$(( COLUMNS - $#mark_idx_disp - 1 )):::::)desc_disp}${mark_idx_disp}"
-                        else
-                            desc_disp="${desc_disp}${mark_idx_disp}"
-                        fi
+                        desc_disp="${desc}${mark_idx_disp}"
                     fi
 
                     displays+="${desc_disp}"
@@ -459,7 +449,7 @@ function filter-select() {
                             "(${(j.|.)${(@M)words:#*'(#e)'}})" \
                             "(${(j.|.)${(@)words:#(\~*|*'(#e)')}})" ; do
                             if [[ "$pattern" != '()' ]]; then
-                                region_highlight+=( "${(f)${(S)desc_disp//*(#b)${~pattern}/$(( offset + mbegin[1] )) $(( offset + mend[1] + 1 )) ${hi}${nl}}%$nl*}" )
+                                region_highlight+=( "${(f)${(S)desc//*(#b)${~pattern}/$(( offset + mbegin[1] )) $(( offset + mend[1] + 1 )) ${hi}${nl}}%$nl*}" )
                             fi
                         done
                     fi
