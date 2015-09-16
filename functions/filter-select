@@ -668,6 +668,7 @@ function _filter-select-init-keybind() {
         bindkey -N filterselect
 
         bindkey -M filterselect -R "!"-"~" self-insert
+        bindkey -M filterselect ' ' magic-space
 
         bindkey -M filterselect '^J' accept-line
         bindkey -M filterselect '^M' accept-line
