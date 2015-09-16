@@ -310,6 +310,17 @@ function filter-select() {
                 _filter-select-reset
                 ;;
 
+            kill-whole-line)
+                if [[ -z "${BUFFER}" ]]; then
+                    key=''
+                    bounds=''
+                    break
+                else
+                    zle "${bounds}"
+                    _filter-select-reset
+                fi
+                ;;
+
             ''|undefined-key)
                 # empty, initial state
                 ;;
