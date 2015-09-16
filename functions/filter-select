@@ -305,12 +305,12 @@ function filter-select() {
                 (( cursor_line = desc_num ))
                 ;;
 
-            self-insert|undefined-key)
+            self-insert)
                 LBUFFER="${LBUFFER}${key}"
                 _filter-select-reset
                 ;;
 
-            '')
+            ''|undefined-key)
                 # empty, initial state
                 ;;
 
@@ -655,6 +655,8 @@ function _filter-select-init-keybind() {
 
     if (( ret != 0 )); then
         bindkey -N filterselect
+
+        bindkey -M filterselect -R "!"-"~" self-insert
 
         bindkey -M filterselect '^J' accept-line
         bindkey -M filterselect '^M' accept-line
